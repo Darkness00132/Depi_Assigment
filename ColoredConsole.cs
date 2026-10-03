@@ -27,21 +27,15 @@ namespace Depi_Assigment
             AnsiConsole.WriteLine();
         }
 
-        public static void WriteLine(string message="")
+        public static void WriteLine(string message="",Color color=default)
         {
-            AnsiConsole.MarkupLine(message);
+            AnsiConsole.Write(new Text(message, new Style(foreground: color)));
+            AnsiConsole.WriteLine();
         }
 
-        public static void Write(string message)
+        public static void Write(string message,Color color)
         {
-            AnsiConsole.Markup(message);
-        }
-
-        public static void LoadingAnimation(string message)
-        {
-            AnsiConsole
-                .Status()
-                .Start(message, ctx => { });
+            AnsiConsole.Markup($"[color={color}]{message}[/]");
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using Depi_Assigment;
+using Spectre.Console;
 
 ColoredConsole.WelcomeMessage();
 
-while (true) 
+while (true)
 {
     List<string> allowedCommands = ["info", "create", "balance", "withdraw", "deposit"];
 
-    ColoredConsole.WriteLine("[cyan]Please enter a command (or type 'exit' to quit):[/]");
+    ColoredConsole.WriteLine("Please enter a command (or type 'exit' to quit):",Color.Cyan);
     ColoredConsole.WriteLine();
 
     string? input = Console.ReadLine();
@@ -14,7 +15,7 @@ while (true)
 
     if (input == null || !allowedCommands.Contains(input.ToLower()))
     {
-        ColoredConsole.WriteLine("[red]Invalid command. Please try again.[/]");
+        ColoredConsole.WriteLine("Invalid command. Please try again.",Color.Red);
         ColoredConsole.WriteLine();
         continue;
     }
