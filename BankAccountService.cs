@@ -96,17 +96,82 @@ namespace Depi_Assigment
             );
         }
 
-        public void CheckBalance() 
+        // Task 3 (Alaa): Show the current account balance.
+        public void CheckBalance()
         {
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("No account has been created yet!", Spectre.Console.Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine($"Current Balance: {account.Balance:F2} EGP", Spectre.Console.Color.Cyan);
         }
 
-        public void Deposit() 
+        // Task 3 (Alaa): Add a valid positive amount to the account.
+        public void Deposit()
         {
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("No account has been created yet!", Spectre.Console.Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine("Enter amount to deposit:", Spectre.Console.Color.Cyan);
+            string? input = Console.ReadLine();
+
+            if (!decimal.TryParse(input, out decimal amount) || amount <= 0)
+            {
+                ColoredConsole.WriteLine("Invalid amount! Please enter a positive number.", Spectre.Console.Color.Red);
+                return;
+            }
+
+            decimal updatedBalance;
+            try
+            {
+                updatedBalance = checked(account.Balance + amount);
+            }
+            catch (OverflowException)
+            {
+                ColoredConsole.WriteLine("Amount is too large.", Spectre.Console.Color.Red);
+                return;
+            }
+
+            // BankAccount.Balance has a private setter in the existing project.
+            // Preserve its public API: replace the internal account snapshot.
+            account = new BankAccount(account.AccountNumber, account.AccountHolderName, updatedBalance);
+            ColoredConsole.WriteLine($"Deposit successful! New Balance: {account.Balance:F2} EGP", Spectre.Console.Color.Green);
         }
 
-        public void Withdraw() 
+        // Task 3 (Alaa): Withdraw a valid amount that does not exceed balance.
+        public void Withdraw()
         {
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("No account has been created yet!", Spectre.Console.Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine("Enter amount to withdraw:", Spectre.Console.Color.Cyan);
+            string? input = Console.ReadLine();
+
+            if (!decimal.TryParse(input, out decimal amount) || amount <= 0)
+            {
+                ColoredConsole.WriteLine("Invalid amount! Please enter a positive number.", Spectre.Console.Color.Red);
+                return;
+            }
+
+            if (amount > account.Balance)
+            {
+                ColoredConsole.WriteLine("Insufficient balance!", Spectre.Console.Color.Red);
+                return;
+            }
+
+            decimal updatedBalance = account.Balance - amount;
+            account = new BankAccount(account.AccountNumber, account.AccountHolderName, updatedBalance);
+            ColoredConsole.WriteLine($"Withdrawal successful! New Balance: {account.Balance:F2} EGP", Spectre.Console.Color.Green);
         }
+
     }  
 }
 
