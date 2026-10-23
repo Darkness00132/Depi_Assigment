@@ -1,25 +1,5 @@
-
-namespace day1
-لهف{
-    public class BankAccount
-    {
-
-        public int AccountNumber { get; private set; }
-
-        public string AccountHolderName { get; private set; }
-
-        public decimal Balance { get; private set; }
-
-        public BankAccount(int accountNumber, string accountHolderName, decimal initialBalance)
-        {
-            AccountNumber = accountNumber;
-            AccountHolderName = accountHolderName;
-            Balance = initialBalance;
-        }
-    }
-
-
-
+namespace Depi_Assigment
+{
     public class BankAccountService
     {
         private BankAccount account;
@@ -114,24 +94,6 @@ namespace day1
             Console.WriteLine(
                 $"Current Balance: {account.Balance:F2} EGP"
             );
-        }
-    }
-
-
-    internal class Program
-    {
-
-        static void Main(string[] args)
-        {;
-
-
-            BankAccountService service = new BankAccountService();
-
-            service.CreateAccount();
-
-            Console.WriteLine();
-
-            service.DisplayAccountInfo();
         }
     }  
 }
