@@ -95,6 +95,18 @@ namespace Depi_Assigment
                 $"Current Balance: {account.Balance:F2} EGP"
             );
         }
+
+        public void CheckBalance() 
+        {
+        }
+
+        public void Deposit() 
+        {
+        }
+
+        public void Withdraw() 
+        {
+        }
     }  
 }
 

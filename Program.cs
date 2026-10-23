@@ -27,26 +27,28 @@ while (true)
         break;
     }
 
+    var bankService = new BankAccountService();
+
     switch (input)
     {
         case "create":
-            BankService.CreateAccount();
+            bankService.CreateAccount();
             break;
 
         case "info":
-            BankService.ShowAccountInfo();
+            bankService.DisplayAccountInfo();
             break;
 
         case "balance":
-            BankService.CheckBalance();
+            bankService.CheckBalance();
             break;
 
         case "deposit":
-            BankService.Deposit();
+            bankService.Deposit();
             break;
 
         case "withdraw":
-            BankService.Withdraw();
+            bankService.Withdraw();
             break;
     }
 
