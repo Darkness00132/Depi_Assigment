@@ -1,5 +1,6 @@
 using Depi_Assigment.Data;
 using Depi_Assigment.Entities;
+using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 
 namespace Depi_Assigment.Services
@@ -15,10 +16,10 @@ namespace Depi_Assigment.Services
 
         public void CreateAccount(string name)
         {
-            var account = _context.BankAccounts
+            var existingAccount = _context.Accounts
                 .FirstOrDefault(a => a.Name == name);
 
-            if (account != null)
+            if (existingAccount != null)
             {
                 ColoredConsole.WriteLine(
                     "An account with this name already exists.",
@@ -26,13 +27,17 @@ namespace Depi_Assigment.Services
                 return;
             }
 
-            var newAccount = new BankAccount
+            var account = new Account
             {
-                Name = name,
-                Balance = 0
+                Name = name
             };
 
-            _context.BankAccounts.Add(newAccount);
+            account.BankAccounts = new List<BankAccount>
+            {
+                new BankAccount(0, 0)
+            };
+
+            _context.Accounts.Add(account);
             _context.SaveChanges();
 
             ColoredConsole.WriteLine(
@@ -42,7 +47,8 @@ namespace Depi_Assigment.Services
 
         public void DisplayAccountInfo(string name)
         {
-            var account = _context.BankAccounts
+            var account = _context.Accounts
+                .Include(a => a.BankAccounts)
                 .FirstOrDefault(a => a.Name == name);
 
             if (account == null)
@@ -51,33 +57,44 @@ namespace Depi_Assigment.Services
                 return;
             }
 
-            ColoredConsole.WriteLine("Account Information", Color.Cyan);
-            ColoredConsole.WriteLine($"Name: {account.Name}", Color.White);
-            ColoredConsole.WriteLine($"Balance: {account.Balance}", Color.Green);
+            ColoredConsole.WriteLine($"Name: {account.Name}", Color.Cyan);
+
+            foreach (var bankAccount in account.BankAccounts)
+            {
+                ColoredConsole.WriteLine(
+                    $"Account ID: {bankAccount.AccountId}",
+                    Color.Cyan);
+
+                ColoredConsole.WriteLine(
+                    $"Balance: {bankAccount.Balance}",
+                    Color.Green);
+            }
         }
 
         public void CheckBalance(string name)
         {
-            var account = _context.BankAccounts
-                .FirstOrDefault(a => a.Name == name);
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
 
-            if (account == null)
+            if (bankAccount == null)
             {
                 ColoredConsole.WriteLine("Account not found.", Color.Red);
                 return;
             }
 
             ColoredConsole.WriteLine(
-                $"Current balance: {account.Balance}",
+                $"Current balance: {bankAccount.Balance}",
                 Color.Green);
         }
 
         public void Deposit(string name, decimal amount)
         {
-            var account = _context.BankAccounts
-                .FirstOrDefault(a => a.Name == name);
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
 
-            if (account == null)
+            if (bankAccount == null)
             {
                 ColoredConsole.WriteLine("Account not found.", Color.Red);
                 return;
@@ -91,20 +108,21 @@ namespace Depi_Assigment.Services
                 return;
             }
 
-            account.Balance += amount;
+            bankAccount.Deposit(amount);
             _context.SaveChanges();
 
             ColoredConsole.WriteLine(
-                $"Deposit successful! New balance: {account.Balance}",
+                $"Deposit successful! New balance: {bankAccount.Balance}",
                 Color.Green);
         }
 
         public void Withdraw(string name, decimal amount)
         {
-            var account = _context.BankAccounts
-                .FirstOrDefault(a => a.Name == name);
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
 
-            if (account == null)
+            if (bankAccount == null)
             {
                 ColoredConsole.WriteLine("Account not found.", Color.Red);
                 return;
@@ -118,7 +136,7 @@ namespace Depi_Assigment.Services
                 return;
             }
 
-            if (account.Balance < amount)
+            if (bankAccount.Balance < amount)
             {
                 ColoredConsole.WriteLine(
                     "Insufficient balance.",
@@ -126,11 +144,11 @@ namespace Depi_Assigment.Services
                 return;
             }
 
-            account.Balance -= amount;
+            bankAccount.Withdraw(amount);
             _context.SaveChanges();
 
             ColoredConsole.WriteLine(
-                $"Withdrawal successful! New balance: {account.Balance}",
+                $"Withdrawal successful! New balance: {bankAccount.Balance}",
                 Color.Green);
         }
     }
