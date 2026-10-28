@@ -1,5 +1,6 @@
 using Depi_Assigment.Data;
 using Depi_Assigment.Entities;
+using Spectre.Console;
 
 namespace Depi_Assigment.Services
 {
@@ -14,49 +15,123 @@ namespace Depi_Assigment.Services
 
         public void CreateAccount(string name)
         {
-            // TODO: 
-            // 1. Check if an account with this name already exists.
-            // 2. If it exists, display a red error message and return.
-            // 3. Otherwise, create a new account with the given name.
-            // 4. Save the account to the database.
+            var account = _context.BankAccounts
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account != null)
+            {
+                ColoredConsole.WriteLine(
+                    "An account with this name already exists.",
+                    Color.Red);
+                return;
+            }
+
+            var newAccount = new BankAccount
+            {
+                Name = name,
+                Balance = 0
+            };
+
+            _context.BankAccounts.Add(newAccount);
+            _context.SaveChanges();
+
+            ColoredConsole.WriteLine(
+                "Account created successfully!",
+                Color.Green);
         }
 
         public void DisplayAccountInfo(string name)
         {
-            // TODO:
-            // 1. Find the account by name.
-            // 2. If it doesn't exist, display an error message and return.
-            // 3. Otherwise, display the account information.
+            var account = _context.BankAccounts
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine("Account Information", Color.Cyan);
+            ColoredConsole.WriteLine($"Name: {account.Name}", Color.White);
+            ColoredConsole.WriteLine($"Balance: {account.Balance}", Color.Green);
         }
 
         public void CheckBalance(string name)
         {
-            // TODO:
-            // 1. Find the account by name.
-            // 2. If it doesn't exist, display an error message and return.
-            // 3. Otherwise, display the current balance.
+            var account = _context.BankAccounts
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine(
+                $"Current balance: {account.Balance}",
+                Color.Green);
         }
 
         public void Deposit(string name, decimal amount)
         {
-            // TODO:
-            // 1. Find the account by name.
-            // 2. If it doesn't exist, display an error message and return.
-            // 3. Add the amount to the account balance.
-            // 4. Save the changes to the database.
-            // 5. Display a success message.
+            var account = _context.BankAccounts
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            if (amount <= 0)
+            {
+                ColoredConsole.WriteLine(
+                    "Amount must be greater than zero.",
+                    Color.Red);
+                return;
+            }
+
+            account.Balance += amount;
+            _context.SaveChanges();
+
+            ColoredConsole.WriteLine(
+                $"Deposit successful! New balance: {account.Balance}",
+                Color.Green);
         }
 
         public void Withdraw(string name, decimal amount)
         {
-            // TODO:
-            // 1. Find the account by name.
-            // 2. If it doesn't exist, display an error message and return.
-            // 3. Check if the account has enough balance.
-            // 4. If the balance is insufficient, display an error message and return.
-            // 5. Subtract the amount from the account balance.
-            // 6. Save the changes to the database.
-            // 7. Display a success message.
+            var account = _context.BankAccounts
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            if (amount <= 0)
+            {
+                ColoredConsole.WriteLine(
+                    "Amount must be greater than zero.",
+                    Color.Red);
+                return;
+            }
+
+            if (account.Balance < amount)
+            {
+                ColoredConsole.WriteLine(
+                    "Insufficient balance.",
+                    Color.Red);
+                return;
+            }
+
+            account.Balance -= amount;
+            _context.SaveChanges();
+
+            ColoredConsole.WriteLine(
+                $"Withdrawal successful! New balance: {account.Balance}",
+                Color.Green);
         }
     }
 }
