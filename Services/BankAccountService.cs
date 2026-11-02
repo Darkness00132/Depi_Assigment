@@ -15,6 +15,7 @@ namespace Depi_Assigment.Services
         }
 
         public void CreateAccount(string name, string password)
+        public void CreateAccount(string name)
         {
             var existingAccount = _context.Accounts
                 .FirstOrDefault(a => a.Name == name);
@@ -35,6 +36,12 @@ namespace Depi_Assigment.Services
                 {
                     new BankAccount(0, 0)
                 }
+                Name = name
+            };
+
+            account.BankAccounts = new List<BankAccount>
+            {
+                new BankAccount(0, 0)
             };
 
             _context.Accounts.Add(account);
@@ -75,6 +82,43 @@ namespace Depi_Assigment.Services
         {
             var bankAccount = Login(name, password);
             if (bankAccount == null) return;
+        public void DisplayAccountInfo(string name)
+        {
+            var account = _context.Accounts
+                .Include(a => a.BankAccounts)
+                .FirstOrDefault(a => a.Name == name);
+
+            if (account == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            ColoredConsole.WriteLine($"Name: {account.Name}", Color.Cyan);
+
+            foreach (var bankAccount in account.BankAccounts)
+            {
+                ColoredConsole.WriteLine(
+                    $"Account ID: {bankAccount.AccountId}",
+                    Color.Cyan);
+
+                ColoredConsole.WriteLine(
+                    $"Balance: {bankAccount.Balance}",
+                    Color.Green);
+            }
+        }
+
+        public void CheckBalance(string name)
+        {
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
+
+            if (bankAccount == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
 
             ColoredConsole.WriteLine(
                 $"Current balance: {bankAccount.Balance}",
@@ -85,6 +129,25 @@ namespace Depi_Assigment.Services
         {
             var bankAccount = Login(name, password);
             if (bankAccount == null) return;
+        public void Deposit(string name, decimal amount)
+        {
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
+
+            if (bankAccount == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            if (amount <= 0)
+            {
+                ColoredConsole.WriteLine(
+                    "Amount must be greater than zero.",
+                    Color.Red);
+                return;
+            }
 
             bankAccount.Deposit(amount);
             _context.SaveChanges();
@@ -102,6 +165,31 @@ namespace Depi_Assigment.Services
             if (bankAccount.Balance < amount)
             {
                 ColoredConsole.WriteLine("Insufficient balance.", Color.Red);
+        public void Withdraw(string name, decimal amount)
+        {
+            var bankAccount = _context.BankAccounts
+                .Include(b => b.Account)
+                .FirstOrDefault(b => b.Account.Name == name);
+
+            if (bankAccount == null)
+            {
+                ColoredConsole.WriteLine("Account not found.", Color.Red);
+                return;
+            }
+
+            if (amount <= 0)
+            {
+                ColoredConsole.WriteLine(
+                    "Amount must be greater than zero.",
+                    Color.Red);
+                return;
+            }
+
+            if (bankAccount.Balance < amount)
+            {
+                ColoredConsole.WriteLine(
+                    "Insufficient balance.",
+                    Color.Red);
                 return;
             }
 
