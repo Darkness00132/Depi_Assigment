@@ -42,6 +42,7 @@ while (true)
             bankService.DisplayAccountInfo(name, password);
             break;
 
+        case "info":
         case "balance":
             bankService.CheckBalance(name, password);
             break;
