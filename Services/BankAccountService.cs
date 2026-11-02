@@ -14,7 +14,7 @@ namespace Depi_Assigment.Services
             _context = new AppDbContext();
         }
 
-        public void CreateAccount(string name)
+        public void CreateAccount(string name, string password)
         {
             var existingAccount = _context.Accounts
                 .FirstOrDefault(a => a.Name == name);
@@ -29,12 +29,12 @@ namespace Depi_Assigment.Services
 
             var account = new Account
             {
-                Name = name
-            };
-
-            account.BankAccounts = new List<BankAccount>
-            {
-                new BankAccount(0, 0)
+                Name = name,
+                Password = password,
+                BankAccounts = new List<BankAccount>
+                {
+                    new BankAccount(0, 0)
+                }
             };
 
             _context.Accounts.Add(account);
@@ -45,68 +45,46 @@ namespace Depi_Assigment.Services
                 Color.Green);
         }
 
-        public void DisplayAccountInfo(string name)
-        {
-            var account = _context.Accounts
-                .Include(a => a.BankAccounts)
-                .FirstOrDefault(a => a.Name == name);
-
-            if (account == null)
-            {
-                ColoredConsole.WriteLine("Account not found.", Color.Red);
-                return;
-            }
-
-            ColoredConsole.WriteLine($"Name: {account.Name}", Color.Cyan);
-
-            foreach (var bankAccount in account.BankAccounts)
-            {
-                ColoredConsole.WriteLine(
-                    $"Account ID: {bankAccount.AccountId}",
-                    Color.Cyan);
-
-                ColoredConsole.WriteLine(
-                    $"Balance: {bankAccount.Balance}",
-                    Color.Green);
-            }
-        }
-
-        public void CheckBalance(string name)
+        private BankAccount? Login(string name, string password)
         {
             var bankAccount = _context.BankAccounts
                 .Include(b => b.Account)
-                .FirstOrDefault(b => b.Account.Name == name);
+                .FirstOrDefault(b => b.Account.Name == name
+                                  && b.Account.Password == password);
 
             if (bankAccount == null)
             {
-                ColoredConsole.WriteLine("Account not found.", Color.Red);
-                return;
+                ColoredConsole.WriteLine("Invalid name or password.", Color.Red);
+                return null;
             }
+
+            return bankAccount;
+        }
+
+        public void DisplayAccountInfo(string name, string password)
+        {
+            var bankAccount = Login(name, password);
+            if (bankAccount == null) return;
+
+            ColoredConsole.WriteLine($"Name: {bankAccount.Account.Name}", Color.Cyan);
+            ColoredConsole.WriteLine($"Account ID: {bankAccount.AccountId}", Color.Cyan);
+            ColoredConsole.WriteLine($"Balance: {bankAccount.Balance}", Color.Green);
+        }
+
+        public void CheckBalance(string name, string password)
+        {
+            var bankAccount = Login(name, password);
+            if (bankAccount == null) return;
 
             ColoredConsole.WriteLine(
                 $"Current balance: {bankAccount.Balance}",
                 Color.Green);
         }
 
-        public void Deposit(string name, decimal amount)
+        public void Deposit(string name, string password, decimal amount)
         {
-            var bankAccount = _context.BankAccounts
-                .Include(b => b.Account)
-                .FirstOrDefault(b => b.Account.Name == name);
-
-            if (bankAccount == null)
-            {
-                ColoredConsole.WriteLine("Account not found.", Color.Red);
-                return;
-            }
-
-            if (amount <= 0)
-            {
-                ColoredConsole.WriteLine(
-                    "Amount must be greater than zero.",
-                    Color.Red);
-                return;
-            }
+            var bankAccount = Login(name, password);
+            if (bankAccount == null) return;
 
             bankAccount.Deposit(amount);
             _context.SaveChanges();
@@ -116,31 +94,14 @@ namespace Depi_Assigment.Services
                 Color.Green);
         }
 
-        public void Withdraw(string name, decimal amount)
+        public void Withdraw(string name, string password, decimal amount)
         {
-            var bankAccount = _context.BankAccounts
-                .Include(b => b.Account)
-                .FirstOrDefault(b => b.Account.Name == name);
-
-            if (bankAccount == null)
-            {
-                ColoredConsole.WriteLine("Account not found.", Color.Red);
-                return;
-            }
-
-            if (amount <= 0)
-            {
-                ColoredConsole.WriteLine(
-                    "Amount must be greater than zero.",
-                    Color.Red);
-                return;
-            }
+            var bankAccount = Login(name, password);
+            if (bankAccount == null) return;
 
             if (bankAccount.Balance < amount)
             {
-                ColoredConsole.WriteLine(
-                    "Insufficient balance.",
-                    Color.Red);
+                ColoredConsole.WriteLine("Insufficient balance.", Color.Red);
                 return;
             }
 
