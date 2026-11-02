@@ -1,25 +1,18 @@
-﻿
-using Depi_Assigment;
+﻿using Depi_Assigment;
+using Depi_Assigment.Services;
 using Spectre.Console;
 
 ColoredConsole.WelcomeMessage();
 
-List<string> allowedCommands = ["info", "create", "balance", "withdraw", "deposit", "exit"];
+var bankService = new BankAccountService();
 
 while (true)
 {
-    ColoredConsole.WriteLine("Please enter a command (or type 'exit' to quit):", Color.Cyan);
-    ColoredConsole.WriteLine();
+    ColoredConsole.WriteLine(
+        "Enter a command (info, create, balance, withdraw, deposit, exit):",
+        Color.Cyan);
 
-    string? input = Console.ReadLine()?.ToLower().Trim();
-    ColoredConsole.WriteLine();
-
-    if (string.IsNullOrEmpty(input) || !allowedCommands.Contains(input))
-    {
-        ColoredConsole.WriteLine("Invalid command. Please try again.", Color.Red);
-        ColoredConsole.WriteLine();
-        continue;
-    }
+    string input = (Console.ReadLine() ?? "").Trim().ToLower();
 
     if (input == "exit")
     {
@@ -27,26 +20,46 @@ while (true)
         break;
     }
 
+    if (input is not ("info" or "create" or "balance" or "withdraw" or "deposit"))
+    {
+        ColoredConsole.WriteLine("Invalid command.", Color.Red);
+        continue;
+    }
+
+    ColoredConsole.WriteLine("Enter your name:", Color.Aquamarine1);
+    string name = Console.ReadLine() ?? "";
+
+    ColoredConsole.WriteLine("Enter your password:", Color.Aquamarine1);
+    string password = Console.ReadLine() ?? "";
+
     switch (input)
     {
         case "create":
-            BankService.CreateAccount();
+            bankService.CreateAccount(name, password);
             break;
 
         case "info":
-            BankService.ShowAccountInfo();
+            bankService.DisplayAccountInfo(name, password);
             break;
 
         case "balance":
-            BankService.CheckBalance();
+            bankService.CheckBalance(name, password);
             break;
 
         case "deposit":
-            BankService.Deposit();
-            break;
-
         case "withdraw":
-            BankService.Withdraw();
+            ColoredConsole.WriteLine("Enter the amount:", Color.Aquamarine1);
+
+            if (!decimal.TryParse(Console.ReadLine(), out decimal amount) || amount <= 0)
+            {
+                ColoredConsole.WriteLine("Invalid amount.", Color.Red);
+                break;
+            }
+
+            if (input == "deposit")
+                bankService.Deposit(name, password, amount);
+            else
+                bankService.Withdraw(name, password, amount);
             break;
     }
 
